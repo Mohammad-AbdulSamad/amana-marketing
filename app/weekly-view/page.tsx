@@ -15,7 +15,7 @@ interface MarketingData {
 
 export default function WeeklyView() {
   const [marketingData, setMarketingData] = useState<MarketingData | null>(null);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
    // Load data on component mount
@@ -42,7 +42,7 @@ export default function WeeklyView() {
     const weeklyData: Record<string, { spend: number; revenue: number; impressions: number; clicks: number }> = {};
 
     marketingData.campaigns.forEach(campaign => {
-      campaign.weekly_performance?.forEach(week => {
+      campaign.weekly_performance?.forEach((week: any) => {
         const weekKey = week.week_start;
         
         if (!weeklyData[weekKey]) {
