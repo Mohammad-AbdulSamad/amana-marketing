@@ -1,12 +1,9 @@
 "use client";
+import dynamic from "next/dynamic";
 import React from "react";
-import {
-  MapContainer,
-  TileLayer,
-  CircleMarker,
-  Tooltip,
-} from "react-leaflet";
-import "leaflet/dist/leaflet.css";
+
+const LeafletMap = dynamic(() => import("./leaflet-map"), { ssr: false });
+
 
 interface BubbleMapDataPoint {
   region: string;
@@ -97,51 +94,17 @@ export const BubbleMap: React.FC<BubbleMapProps> = ({
         className="rounded-xl overflow-hidden border border-gray-700"
         style={{ height }}
       >
-        <MapContainer
-          center={[25, 50]} // GCC-centered view
-          zoom={4}
-          style={{ height: "100%", width: "100%" }}
-          scrollWheelZoom={true}
-        >
-          {/* Light grayscale basemap */}
-          <TileLayer
-            url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
-            attribution='&copy; <a href="https://carto.com/">CARTO</a> contributors'
-          />
-
-          {enriched.map((point, i) => {
-            const value = point[metric] || point.value;
-            return (
-              <CircleMarker
-                key={i}
-                center={[point.lat!, point.lng!]}
-                radius={getRadius(value)}
-                pathOptions={{
-                  color: getColor(value),
-                  fillColor: getColor(value),
-                  fillOpacity: 0.6,
-                  weight: 1,
-                }}
-              >
-                <Tooltip direction="top" offset={[0, -5]}>
-                  <div>
-                    <strong>{point.region}</strong>
-                    <br />
-                    {point.country}
-                    <br />
-                    {metric}: {formatValue(value)}
-                    {point.roas && (
-                      <>
-                        <br />
-                        ROAS: {point.roas.toFixed(2)}x
-                      </>
-                    )}
-                  </div>
-                </Tooltip>
-              </CircleMarker>
-            );
-          })}
-        </MapContainer>
+       <LeafletMap
+      points={enriched.map((point) => ({
+      lat: point.lat!,
+      lng: point.lng!,
+      label: point.region,
+      color: getColor(point[metric] || point.value),
+      radius: getRadius(point[metric] || point.value),
+      tooltip: `${point.region} - ${formatValue(point[metric] || point.value)}`,
+    }))}
+    height={height}
+    />
       </div>
     </div>
   );
